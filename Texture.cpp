@@ -13,7 +13,7 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 	
 	};
 
-	float _indices[6] = {
+	unsigned int _indices[6] = {
 	
 		0, 1, 2,
 		2, 3, 1
@@ -26,23 +26,28 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 	std::copy(_vertices, _vertices + 20, vertices);
 	std::copy(_indices, _indices + 6, indices);
 
+	std::cout << vertices[1] << std::endl;
+
+	shader.init("Shaders/Default.vert", "Shaders/Red_Box.frag");
+
 	stbi_set_flip_vertically_on_load(true);
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
 	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
-
 	glGenBuffers(1, &ebo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	glGenTextures(1, &texture);
@@ -54,11 +59,12 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load(_path, &width, &height, &nrChannels, 0);
-
+	unsigned char* data = stbi_load("Assets/Red_box.png", &width, &height, &nrChannels, 0);
+	GLenum format = GL_RGB;
+	if (nrChannels == 4) format = GL_RGBA;
 	if (data != NULL) {
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
@@ -73,8 +79,8 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 	shader.setInt("texture_", id);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	return true;
 }
@@ -112,7 +118,7 @@ void Texture::draw(Shader &shader) {
 
 	shader.use();
 	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, &indices);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 	
 }
