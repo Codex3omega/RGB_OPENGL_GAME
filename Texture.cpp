@@ -28,7 +28,6 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 
 	std::cout << vertices[1] << std::endl;
 
-	shader.init("Shaders/Default.vert", "Shaders/Red_Box.frag");
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -59,7 +58,7 @@ bool Texture::create(float normal_w, float normal_h, const char* _path, unsigned
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("Assets/Red_box.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(_path, &width, &height, &nrChannels, 0);
 	GLenum format = GL_RGB;
 	if (nrChannels == 4) format = GL_RGBA;
 	if (data != NULL) {
